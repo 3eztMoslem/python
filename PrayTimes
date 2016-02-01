@@ -1,0 +1,130 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+import pygtk
+pygtk.require('2.0')
+import gtk
+import datetime
+import time
+from time import sleep, strftime, localtime
+from os import system as shell
+#--------
+def delete_event(widget, data):
+    return False
+def destroy(widget, data = None):
+    gtk.main_quit();
+def main():
+    gtk.main()
+def hideMSG(widget, data =None):
+    windowMSG.hide()
+#--------
+current_month = strftime("%m-%Y", localtime())
+current_day = strftime("%d", localtime())
+current_TarM = strftime("%d / %m / %Y", localtime()) # التاريخ الميلادي
+tim1 = datetime.datetime.time(datetime.datetime.now())# لاستخراج الوقت فقط
+now = datetime.datetime.now() # خاص بالأيام
+month_error = 'No'
+print current_TarM
+builder = gtk.Builder()
+builder.add_from_file('PrayTimes.glade')
+window = builder.get_object('window1')
+lep_M = builder.get_object('labelTarM')
+
+#------------- أوقات الصلاة
+FajrK = builder.get_object('labelFJK')
+FajrS = builder.get_object('labelFJS')
+Sunrise = builder.get_object('labelSH')
+Dhuhr = builder.get_object('labelD')
+Asr = builder.get_object('labelA')
+Maghrib = builder.get_object('labelM')
+Isha = builder.get_object('labelASH')
+lep_TIM = builder.get_object('labelTIME')
+lep_day = builder.get_object('labelday')
+lep_z = builder.get_object('labelZ')
+lep_z2 = builder.get_object('labelz2')
+windowMSG = builder.get_object('messagedialog1')
+#buttonC = builder.get_object('buttonCls') # زر أغلاق رسالة الخطأ
+#buttonD = builder.get_object('buttonDwn') # زر تحميل ملف الشهر الحالي
+#-------------
+lep_T = builder.get_object('labelTAR') # كائن لتاريخ الهجري
+lep_M.set_text(current_TarM)
+try:
+	month_file = open(current_month,"r")
+except:
+    month_error = 'error'
+if (month_error == 'erorr'):
+    month_error = 'error'
+    #windowMSG.show()
+else:
+    day_prays = month_file.read().split('\n')[int(current_day)-1].split("|")
+    print day_prays
+    FajrK.set_text(day_prays[0])
+    FajrS.set_text(day_prays[1])
+    Sunrise.set_text(day_prays[2])
+    Dhuhr.set_text(day_prays[3])
+    Asr.set_text(day_prays[4])
+    Maghrib.set_text(day_prays[5])
+    Isha.set_text(day_prays[6])
+    lep_T.set_text(day_prays[7])
+    #lep_TIM.set_text(tim1.strftime('%S : %M : %H'))
+    if (now.strftime("%A")== 'Saturday'):
+        lep_day.set_text('السبت')
+        #lep_day.set_markup('<span color="red">السبت</span>')
+        #span color=\"#FFFFFF\"
+    elif (now.strftime("%A")== 'Sunday'):
+        lep_day.set_text('الأحد')
+        lep_z.set_text('لا تنسى صيام يوم الأثنين')
+    elif (now.strftime("%A")== 'Monday'):
+        lep_day.set_text('الإثنين')
+    elif (now.strftime("%A")== 'Tuesday'):
+        lep_day.set_text('الثلاثاء')
+    elif (now.strftime("%A")== 'Wednesday'):
+        lep_day.set_text('الأربعاء')
+        lep_z.set_text('لا تنسى صيام يوم الخميس')
+    elif (now.strftime("%A")== 'Thursday'):
+        lep_day.set_text('الخميس')
+    elif (now.strftime("%A")== 'Friday'):
+        lep_day.set_text('الجمعة')
+        #Slep_day.set_markup("<b> الجمعة </b>")
+    if (day_prays[6]<time.strftime('%H:%M')):
+        FajrK.set_markup('<span color="red">'+ day_prays[0] +'</span>') # الفجر ك
+    elif (day_prays[5]<time.strftime('%H:%M')):
+        Isha.set_markup('<span color="red">'+ day_prays[6] +'</span>') # العشاء
+    elif (day_prays[4]<time.strftime('%H:%M')):
+        Maghrib.set_markup('<span color="red">'+ day_prays[5] +'</span>') # المغرب
+        lep_z2.set_text('أذكار المساء')
+    elif (day_prays[3]<time.strftime('%H:%M')):
+        Asr.set_markup('<span color="red">'+ day_prays[4] +'</span>') # العصر
+    elif (day_prays[2]<time.strftime('%H:%M')):
+        Dhuhr.set_markup('<span color="red">'+ day_prays[3] +'</span>') # الظهر
+        lep_z2.set_text('أذكار الصباح')
+    elif (day_prays[1]<time.strftime('%H:%M')):
+        Sunrise.set_markup('<span color="red">'+ day_prays[2] +'</span>') # شروق الشمس
+        lep_z2.set_text('أذكار الصباح')
+    elif (day_prays[0]<time.strftime('%H:%M')):
+        FajrS.set_markup('<span color="red">'+ day_prays[1] +'</span>') # الفجر ص
+    if (day_prays[7]==int(12)):
+        lep_z.set_text('غدا أول الأيام البيض , لا نتسى صيامه')
+    elif (day_prays[7]==int(13)):
+        lep_z.set_text('غدا ثاني الأيام البيض , لا تنسى صيامه')
+    elif (day_prays[7]==int(14)):
+        lep_z.set_text('غدا أخر يوم من الأيام البيض , لا نتسى صيامه')
+#-------------------- الساعة
+#buttonD.connect('clicked', DwnFile)
+class Clock:
+    def update(self):
+        lep_TIM.set_text(time.strftime('%H:%M:%S'))
+        return True  #needed to keep the update method in the schedule
+if __name__ == "__main__":
+    clock = Clock()
+    gtk.timeout_add(200, clock.update)  #add to the main loop scheduled tasks
+#-------------
+#buttonC.connect('clicked', hideMSG)
+window.connect('delete_event', delete_event)
+window.connect('destroy', destroy)
+#-------------
+window.show()
+gtk.main()
+''' 
+لتواصل معي :
+http://www.linuxac.org/forum/threads/72248-%D8%A3%D9%88%D8%AF-%D8%A8%D8%B1%D9%85%D8%AC%D8%A9-%D8%A8%D8%B1%D9%86%D8%A7%D9%85%D8%AC-%D8%A3%D9%88%D9%82%D8%A7%D8%AA-%D8%A7%D9%84%D8%B5%D9%84%D8%A7%D8%A9-%D8%A8%D8%A8%D8%A7%D9%8A%D8%AB%D9%88%D9%86-%D8%9F-%D9%85%D8%A7-%D9%87%D9%8A-%D9%86%D8%B5%D8%A7%D8%A6%D8%AD%D9%83%D9%85-%D9%84%D9%8A%D8%9F?p=548001#post548001
+'''
